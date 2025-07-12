@@ -22,23 +22,56 @@ const server = new Server({
 });
 // intercept any request to list the tools
 server.setRequestHandler(ListToolsRequestSchema, (request) => {
-  return { tools: [
-    {
+  return {
+    tools: [
+      {
         name: "gemini_cli_helper",
         description: "Execute Gemini CLI commands",
         parameters: z.object({
-            command: z.string(),
-            workingDir: z.string().optional(),
+          command: z.string().describe("The command to execute"),
+          workingDir: z
+            .string()
+            .optional()
+            .describe("The working directory to execute the command in"),
         }),
-    }
-  ] };
+      },
+    ],
+  };
 });
 // intercept any request to call a tool
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    if (request.params.name === "name_of_tool") {
-      return {};
+  if (request.params.name === "gemini_cli_helper") {
+    try {
+      const { arguments: args } = request.params;
+
+      if (!args || typeof args !== "object") {
+        throw new McpError(ErrorCode.InvalidParams, "Invalid arguments");
+      }
+
+      const { command, workingDir } = args;
+
+      if (typeof command !== "string" || !command.trim()) {
+        throw new McpError(ErrorCode.InvalidParams, "Prompt is wrong");
+      }
+      if (typeof workingDir !== "string" || !workingDir.trim()) {
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          "Working directory is wrong"
+        );
+      }
+
+      const result = await gemini_cli_helper(command, workingDir);
+      return {
+        result: result,
+      };
+    } catch (error) {
+      throw new McpError(
+        ErrorCode.InternalError,
+        "Couldn't Execute Gemini CLI command"
+      );
     }
-    throw new McpError(ErrorCode.InternalError, "Internal error");
+  }
+  throw new McpError(ErrorCode.InternalError, "Internal Error");
 });
 
 const transport = new StdioServerTransport();
