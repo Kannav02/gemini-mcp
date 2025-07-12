@@ -1,79 +1,41 @@
 import "dotenv/config";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  CallToolRequestSchema,
-  ErrorCode,
-  ListToolsRequestSchema,
-  McpError,
-} from "@modelcontextprotocol/sdk/types.js";
-import gemini_cli_helper from "./gemini_cli_helper.ts";
 import { z } from "zod";
+import gemini_cli_helper from "./gemini_cli_helper.ts";
 
-// server object
-const server = new Server({
-  name: "my-mcp-server",
-  version: "1.0.0",
-  description: "My MCP Server",
-  capabilities: {
-    resources: {},
-    tools: {},
+// 1 – Plain server metadata only ↓
+const server = new McpServer({
+  name:        "gemini-mcp",
+  version:     "1.0.0",
+  description: "Expose Gemini-CLI as an MCP tool"
+});
+
+// 2 – Tell the SDK about the tool.
+//    registerTool() ↔ adds the schema to capabilities.tools automatically
+server.registerTool(
+  "gemini_cli_helper",
+  {
+    title:       "Gemini CLI helper",
+    description: "Run any `gemini` command and stream back stdout/stderr",
+    inputSchema: {
+      command:    z.string().describe("Full Gemini CLI command line"),
+      workingDir: z.string().optional().describe("Directory to run the command in")
+    }
   },
-});
-// intercept any request to list the tools
-server.setRequestHandler(ListToolsRequestSchema, (request) => {
-  return {
-    tools: [
-      {
-        name: "gemini_cli_helper",
-        description: "Execute Gemini CLI commands",
-        parameters: z.object({
-          command: z.string().describe("The command to execute"),
-          workingDir: z
-            .string()
-            .optional()
-            .describe("The working directory to execute the command in"),
-        }),
-      },
-    ],
-  };
-});
-// intercept any request to call a tool
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === "gemini_cli_helper") {
+  async ({ command, workingDir }) => {
     try {
-      const { arguments: args } = request.params;
-
-      if (!args || typeof args !== "object") {
-        throw new McpError(ErrorCode.InvalidParams, "Invalid arguments");
-      }
-
-      const { command, workingDir } = args;
-
-      if (typeof command !== "string" || !command.trim()) {
-        throw new McpError(ErrorCode.InvalidParams, "Prompt is wrong");
-      }
-      if (typeof workingDir !== "string" || !workingDir.trim()) {
-        throw new McpError(
-          ErrorCode.InvalidParams,
-          "Working directory is wrong"
-        );
-      }
-
-      const result = await gemini_cli_helper(command, workingDir);
+      const output = await gemini_cli_helper(command, workingDir);
+      return { content: [{ type: "text", text: output }] };
+    } catch (err: unknown) {
+      const e = err as Error;
       return {
-        result: result,
+        content: [{ type: "text", text: `Error: ${e.message}` }],
+        isError: true
       };
-    } catch (error) {
-      throw new McpError(
-        ErrorCode.InternalError,
-        "Couldn't Execute Gemini CLI command"
-      );
     }
   }
-  throw new McpError(ErrorCode.InternalError, "Internal Error");
-});
+);
 
-const transport = new StdioServerTransport();
-
-await server.connect(transport);
+// 3 – Wire up stdio transport
+await server.connect(new StdioServerTransport());
