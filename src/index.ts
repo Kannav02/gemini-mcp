@@ -1,41 +1,33 @@
 import "dotenv/config";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import gemini_cli_helper from "./gemini_cli_helper.ts";
+import registerTools from "./registerTools.ts";
 
-// 1 – Plain server metadata only ↓
+// 1 – Plain server metadata only
+// mcp servers have the capabilites to prvide the following
+// - tools: functions that can be called by the LLM
+// - resources: file like data that can be read by the LLM
+// - prompts: templates to achieve tasks
+
 const server = new McpServer({
-  name:        "gemini-mcp",
-  version:     "1.0.0",
-  description: "Expose Gemini-CLI as an MCP tool"
+  name: "gemini-mcp",
+  version: "1.0.0",
+  description: "Expose Gemini-CLI as an MCP tool",
+  capabilities: {
+    tools: {
+      listChanged: true,
+    },
+  },
 });
 
-// 2 – Tell the SDK about the tool.
-//    registerTool() ↔ adds the schema to capabilities.tools automatically
-server.registerTool(
-  "gemini_cli_helper",
-  {
-    title:       "Gemini CLI helper",
-    description: "Run any `gemini` command and stream back stdout/stderr",
-    inputSchema: {
-      command:    z.string().describe("Full Gemini CLI command line"),
-      workingDir: z.string().optional().describe("Directory to run the command in")
-    }
-  },
-  async ({ command, workingDir }) => {
-    try {
-      const output = await gemini_cli_helper(command, workingDir);
-      return { content: [{ type: "text", text: output }] };
-    } catch (err: unknown) {
-      const e = err as Error;
-      return {
-        content: [{ type: "text", text: `Error: ${e.message}` }],
-        isError: true
-      };
-    }
-  }
-);
+registerTools(server);
 
-// 3 – Wire up stdio transport
-await server.connect(new StdioServerTransport());
+const main = async () => {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+};
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
