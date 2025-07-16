@@ -47,18 +47,35 @@ The server will start and listen for MCP connections via stdio.
 
 To connect this server to your MCP client (like Claude Desktop), add the following configuration to your MCP settings file:
 
-### For Claude Desktop
+### For Claude Desktop (Using Bun - Recommended)
 
 Add this to your `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
+    "gemini_cli": {
+      "command": "/opt/homebrew/bin/bun",
+      "args": ["/path/to/gemini-mcp/src/index.ts"]
+    }
+  }
+}
+```
+
+Note: Replace `/path/to/gemini-mcp` with the actual path to your cloned repository.
+
+### For Claude Desktop (Using Node - Build Required)
+
+If you prefer using Node.js, first build the project with `bun run build`, then add this to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
     "gemini-mcp": {
       "command": "node",
-      "args": ["path/to/gemini-mcp/dist/index.js"],
+      "args": ["/path/to/gemini-mcp/dist/index.js"],
       "env": {
-        "NODE_PATH": "path/to/gemini-mcp/node_modules"
+        "NODE_PATH": "/path/to/gemini-mcp/node_modules"
       }
     }
   }
@@ -67,9 +84,16 @@ Add this to your `claude_desktop_config.json`:
 
 ### For other MCP clients
 
-Configure your MCP client to connect to this server using the stdio transport with the command:
+Configure your MCP client to connect to this server using the stdio transport with one of these commands:
+
+**Using Bun (No build required):**
 ```bash
-node path/to/gemini-mcp/dist/index.js
+/opt/homebrew/bin/bun /path/to/gemini-mcp/src/index.ts
+```
+
+**Using Node (Build required):**
+```bash
+node /path/to/gemini-mcp/dist/index.js
 ```
 
 ## Available Tools
