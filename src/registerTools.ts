@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import gemini_cli_helper from "./gemini_cli_helper.ts";
+import type { ToolResponse, GeminiError } from "./types.ts";
 
 const registerTools = (server: McpServer) => {
   server.tool(
@@ -13,19 +14,23 @@ const registerTools = (server: McpServer) => {
         .optional()
         .describe("Directory to run the command in"),
     },
-    async ({ command, workingDir }) => {
+    async ({ command, workingDir }): Promise<ToolResponse> => {
       try {
-        const output = await gemini_cli_helper(command, workingDir);
+        const result = await gemini_cli_helper({ command, workingDir });
 
-        if (!output) {
+        if (!result.stdout && !result.stderr) {
           return { content: [{ type: "text", text: "No output" }] };
         }
 
-        return { content: [{ type: "text", text: output }] };
+        const outputText = result.stderr ? 
+          `${result.stdout}\nstderr: ${result.stderr}` : 
+          result.stdout;
+
+        return { content: [{ type: "text", text: outputText }] };
       } catch (err: unknown) {
-        const e = err as Error;
+        const e = err as GeminiError;
         return {
-          content: [{ type: "text", text: `Error: ${e.message}` }],
+          content: [{ type: "text", text: `Error: ${e.message}${e.code ? ` (${e.code})` : ''}` }],
           isError: true,
         };
       }
