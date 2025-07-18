@@ -55,14 +55,14 @@ Add this to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "gemini_cli": {
-      "command": "/opt/homebrew/bin/bun",
-      "args": ["/path/to/gemini-mcp/src/index.ts"]
+      "command": "bun",
+      "args": ["<path-to-gemini-mcp>/src/index.ts"]
     }
   }
 }
 ```
 
-Note: Replace `/path/to/gemini-mcp` with the actual path to your cloned repository.
+Note: Replace `<path-to-gemini-mcp>` with the actual path to your cloned repository.
 
 ### For Claude Desktop (Using Node - Build Required)
 
@@ -73,9 +73,9 @@ If you prefer using Node.js, first build the project with `bun run build`, then 
   "mcpServers": {
     "gemini-mcp": {
       "command": "node",
-      "args": ["/path/to/gemini-mcp/dist/index.js"],
+      "args": ["<path-to-gemini-mcp>/dist/index.js"],
       "env": {
-        "NODE_PATH": "/path/to/gemini-mcp/node_modules"
+        "NODE_PATH": "<path-to-gemini-mcp>/node_modules"
       }
     }
   }
@@ -88,12 +88,12 @@ Configure your MCP client to connect to this server using the stdio transport wi
 
 **Using Bun (No build required):**
 ```bash
-/opt/homebrew/bin/bun /path/to/gemini-mcp/src/index.ts
+bun <path-to-gemini-mcp>/src/index.ts
 ```
 
 **Using Node (Build required):**
 ```bash
-node /path/to/gemini-mcp/dist/index.js
+node <path-to-gemini-mcp>/dist/index.js
 ```
 
 ## Available Tools
