@@ -1,5 +1,8 @@
 
 // src/types.ts
+
+import GeminiCustomCommand from "./GeminiCustomCommand";
+
 // Command execution result type
 export interface CommandResult {
   stdout: string;
@@ -18,6 +21,9 @@ export interface ToolResponse {
 export interface GeminiCommandParams {
   command: string;
   workingDir?: string;
+}
+export interface GemininCustomCommandParams extends GeminiCommandParams {
+  args: string;
 }
 
 // Error types for better error handling
