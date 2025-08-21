@@ -1,7 +1,4 @@
-
 // src/types.ts
-
-import GeminiCustomCommand from "./GeminiCustomCommand";
 
 // Command execution result type
 export interface CommandResult {
@@ -13,7 +10,7 @@ export interface CommandResult {
 // Tool response types
 export interface ToolResponse {
   [x: string]: unknown;
-  content: Array<{ type: "text"; text: string }>;
+  content: Array<{ type: 'text'; text: string }>;
   isError?: boolean;
 }
 

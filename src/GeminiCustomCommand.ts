@@ -1,12 +1,12 @@
-import "dotenv/config";
-import { $ } from "bun";
-import { existsSync } from "fs";
-import { resolve } from "path";
+import 'dotenv/config';
+import { $ } from 'bun';
+import { existsSync } from 'fs';
+import { resolve } from 'path';
 import type {
   CommandResult,
   GeminiError,
   GemininCustomCommandParams,
-} from "./types.ts";
+} from './types.ts';
 
 export class GeminiCustomCommand {
   private readonly executeCustomCommand = async ({
@@ -23,7 +23,7 @@ export class GeminiCustomCommand {
           const dirError: GeminiError = new Error(
             `Directory does not exist: ${resolvedDir}`
           ) as GeminiError;
-          dirError.code = "DIRECTORY_NOT_FOUND";
+          dirError.code = 'DIRECTORY_NOT_FOUND';
           throw dirError;
         }
         process.chdir(resolvedDir);
@@ -32,23 +32,23 @@ export class GeminiCustomCommand {
       // Validate command arguments
       if (!/^[a-zA-Z0-9\s\-_.,/!?'"()\[\]{}@#$%^&*+=<>:;]+$/.test(args)) {
         const invalidError: GeminiError = new Error(
-          "Command arguments contain invalid characters"
+          'Command arguments contain invalid characters'
         ) as GeminiError;
-        invalidError.code = "INVALID_ARGUMENTS";
+        invalidError.code = 'INVALID_ARGUMENTS';
         throw invalidError;
       }
 
       // Execute custom command using printf pipe approach
       const fullCommand = `/${command} ${args}`;
-      const timeoutPromise = new Promise<never>((_,reject)=>{
-        setTimeout(()=>{
-          reject(new Error("Command timed out"));
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('Command timed out'));
         }, 40000);
-      })
+      });
 
       const result = await Promise.race([
-        $`printf ${fullCommand + "\n"} | gemini`.quiet(),
-        timeoutPromise
+        $`printf ${fullCommand + '\n'} | gemini`.quiet(),
+        timeoutPromise,
       ]);
 
       const stdout = result.stdout.toString();
@@ -56,20 +56,20 @@ export class GeminiCustomCommand {
       const exitCode = result.exitCode || 0;
 
       // Filter out common noise from stdout
-      const lines = stdout.split("\n");
+      const lines = stdout.split('\n');
       const filteredLines = lines.filter(
         (line) =>
-          !line.includes("Loaded cached credentials") &&
-          !line.includes("Loading credentials") &&
-          !line.includes("Authenticating") &&
-          !line.includes("Error flushing log events") &&
-          !line.includes("Data collection is disabled") &&
-          !line.includes("DeprecationWarning") &&
-          line.trim() !== ""
+          !line.includes('Loaded cached credentials') &&
+          !line.includes('Loading credentials') &&
+          !line.includes('Authenticating') &&
+          !line.includes('Error flushing log events') &&
+          !line.includes('Data collection is disabled') &&
+          !line.includes('DeprecationWarning') &&
+          line.trim() !== ''
       );
 
       return {
-        stdout: filteredLines.join("\n").trim(),
+        stdout: filteredLines.join('\n').trim(),
         stderr,
         exitCode,
       };
@@ -77,7 +77,7 @@ export class GeminiCustomCommand {
       const geminiError: GeminiError = new Error(
         `Failed to execute custom command: ${(error as Error).message}`
       ) as GeminiError;
-      geminiError.code = "EXECUTION_FAILED";
+      geminiError.code = 'EXECUTION_FAILED';
       throw geminiError;
     } finally {
       process.chdir(originalDir);
@@ -88,7 +88,7 @@ export class GeminiCustomCommand {
    * Conducts thorough research and investigation on any topic or question
    */
   async research(args: string, workingDir?: string): Promise<CommandResult> {
-    return this.executeCustomCommand({ command: "research", args, workingDir });
+    return this.executeCustomCommand({ command: 'research', args, workingDir });
   }
 
   /**
@@ -99,7 +99,7 @@ export class GeminiCustomCommand {
     workingDir?: string
   ): Promise<CommandResult> {
     return this.executeCustomCommand({
-      command: "plan_codebase",
+      command: 'plan_codebase',
       args,
       workingDir,
     });
@@ -113,7 +113,7 @@ export class GeminiCustomCommand {
     workingDir?: string
   ): Promise<CommandResult> {
     return this.executeCustomCommand({
-      command: "documentation",
+      command: 'documentation',
       args,
       workingDir,
     });
@@ -127,7 +127,7 @@ export class GeminiCustomCommand {
     workingDir?: string
   ): Promise<CommandResult> {
     return this.executeCustomCommand({
-      command: "system-design",
+      command: 'system-design',
       args,
       workingDir,
     });
