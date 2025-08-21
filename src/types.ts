@@ -1,5 +1,5 @@
-
 // src/types.ts
+
 // Command execution result type
 export interface CommandResult {
   stdout: string;
@@ -10,7 +10,7 @@ export interface CommandResult {
 // Tool response types
 export interface ToolResponse {
   [x: string]: unknown;
-  content: Array<{ type: "text"; text: string }>;
+  content: Array<{ type: 'text'; text: string }>;
   isError?: boolean;
 }
 
@@ -18,6 +18,9 @@ export interface ToolResponse {
 export interface GeminiCommandParams {
   command: string;
   workingDir?: string;
+}
+export interface GemininCustomCommandParams extends GeminiCommandParams {
+  args: string;
 }
 
 // Error types for better error handling

@@ -1,11 +1,11 @@
-import "dotenv/config";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import registerTools from "./registerTools.ts";
-import type { ServerConfig } from "./types.ts";
+import 'dotenv/config';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import registerTools from './registerTools.ts';
+import type { ServerConfig } from './types.ts';
 
 // Suppress Node.js deprecation warnings
-process.env.NODE_NO_WARNINGS = "1";
+process.env.NODE_NO_WARNINGS = '1';
 
 // 1 – Plain server metadata only
 // mcp servers have the capabilites to prvide the following
@@ -14,9 +14,9 @@ process.env.NODE_NO_WARNINGS = "1";
 // - prompts: templates to achieve tasks
 
 const serverConfig: ServerConfig = {
-  name: "gemini-mcp",
-  version: "1.0.0",
-  description: "Expose Gemini-CLI as an MCP tool",
+  name: 'gemini-mcp',
+  version: '1.0.0',
+  description: 'Expose Gemini-CLI as an MCP tool',
   capabilities: {
     tools: {
       listChanged: true,
