@@ -18,17 +18,20 @@ Before using this tool, you need to have the following installed on your machine
 ## Installation
 
 1. Clone this repository:
+
 ```bash
 git clone <repository-url>
 cd gemini-mcp
 ```
 
 2. Install dependencies:
+
 ```bash
 bun install
 ```
 
 3. Build the project:
+
 ```bash
 bun run build
 ```
@@ -87,11 +90,13 @@ If you prefer using Node.js, first build the project with `bun run build`, then 
 Configure your MCP client to connect to this server using the stdio transport with one of these commands:
 
 **Using Bun (No build required):**
+
 ```bash
 bun <path-to-gemini-mcp>/src/index.ts
 ```
 
 **Using Node (Build required):**
+
 ```bash
 node <path-to-gemini-mcp>/dist/index.js
 ```
@@ -103,17 +108,56 @@ node <path-to-gemini-mcp>/dist/index.js
 **Description:** Run any `gemini` command and stream back stdout/stderr
 
 **Parameters:**
+
 - `command` (required): Full Gemini CLI command line (e.g., "What is the capital of France?")
 - `workingDir` (optional): Directory to run the command in
 
 **Example Usage:**
+
 ```javascript
 // Simple prompt
-gemini_cli_helper("Explain quantum computing in simple terms")
+gemini_cli_helper('Explain quantum computing in simple terms');
 
 // With working directory
-gemini_cli_helper("Analyze the code in this repository", "/path/to/project")
+gemini_cli_helper('Analyze the code in this repository', '/path/to/project');
 ```
+
+### Custom Command Tools
+
+The server provides specialized tools powered by custom prompts for specific use cases:
+
+#### `gemini_research`
+
+**Description:** Conducts thorough research and investigation on any topic or question
+
+- **Parameters:** `args` (research topic), `workingDir` (optional)
+
+#### `gemini_plan_codebase`
+
+**Description:** Investigates and creates a strategic plan to accomplish a task
+
+- **Parameters:** `args` (task/objective), `workingDir` (optional)
+
+#### `gemini_documentation`
+
+**Description:** Analyzes and creates comprehensive documentation strategies
+
+- **Parameters:** `args` (subject/project), `workingDir` (optional)
+
+#### `gemini_system_design`
+
+**Description:** Analyzes system architecture and designs solutions at the system level
+
+- **Parameters:** `args` (system requirements), `workingDir` (optional)
+
+### Custom Command Configuration
+
+Custom commands use TOML files in the `toml_files/` directory to define their prompts and behavior. Each TOML file contains:
+
+- `description`: Brief description of the command's purpose
+- `prompt`: The specialized prompt template that guides Gemini's behavior
+
+You can modify these TOML files to customize the behavior of each command or create new ones by following the existing pattern and then add it to gemin cli for custom commands that can be run easily and also accessed by the agent via the MCP Server
 
 ## Authentication
 
